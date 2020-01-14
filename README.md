@@ -1,15 +1,15 @@
-##All code was pretty much pulled from progmem's Switch-Fightstick
+## All code was pretty much pulled from progmem's Switch-Fightstick
 https://github.com/progmem/Switch-Fightstick
 
-##And inspiration from shinyquagsire23's Splatoon printer
+## And inspiration from shinyquagsire23's Splatoon printer
 https://github.com/shinyquagsire23/Switch-Fightstick
 
 TESTED ON ARDUINO UNO R3
 
-##Install instructions:
+## Install instructions:
 Pretty much the same as shinyquagsire23's install instructions
 
-##Setup:
+## Setup:
 1) On line 94 in Joystick.c change the frame of which your shiny is at (assuming you are at frame 1)
 
 2) Run make file
@@ -29,4 +29,4 @@ https://youtu.be/UKzyL2bPEnI
 
 9) Plug in the Arduino/teensy
 
-## The switch will stop 4 frames out from the desired shiny to allow to reset for the correct species
+## The switch will stop 4 frames out from the desired shiny to allow to reset for the correct species ##
