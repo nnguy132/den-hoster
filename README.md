@@ -5,6 +5,7 @@ https://github.com/progmem/Switch-Fightstick
 https://github.com/shinyquagsire23/Switch-Fightstick
 
 TESTED ON ARDUINO UNO R3
+NO CFW REQUIRED
 
 ## Install instructions:
 Pretty much the same as shinyquagsire23's install instructions
