@@ -104,7 +104,7 @@ int main(void) {
 	// Once that's done, we'll enter an infinite loop.
 	for (;;)
 	{
-		if (frame > (SHINY_FRAME - 5)) {// 4 frames out
+		if (frame > (SHINY_FRAME - 4)) {// 4 frames out
 			for (;;) {} //when done enter infinite empty loop
 		}
 		// We need to run our task to process and deliver data for our IN and OUT endpoints.
