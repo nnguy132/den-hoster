@@ -6,6 +6,8 @@ https://github.com/shinyquagsire23/Switch-Fightstick
 
 TESTED ON ARDUINO UNO R3
 NO CFW REQUIRED
+CODE CURRENTLY ONLY WORKS ON DD/MM
+In order to change it to mm/dd change line 342 from end_month < 30 to end_month < 12
 
 ## Install instructions:
 Pretty much the same as shinyquagsire23's install instructions
