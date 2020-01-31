@@ -91,7 +91,9 @@ void debounce_ports(void) {
 	}
 }
 
-#define SHINY_FRAME 156
+#define WAIT 4
+#define WAIT_PRESS 4
+#define SHINY_FRAME 3486
 int frame = 1;
 int end_month = 0;
 
@@ -241,22 +243,20 @@ void HID_Task(void) {
 	}
 }
 
+// script states
 typedef enum {
 	PRESS_A,
 	MOVE_LEFT,
 	MOVE_UP,
 	PRESS_OK
 } State_t;
-State_t state = PRESS_A;
+State_t state = PRESS_A; // initial state
 int release = 0;
-
-#define WAIT 5
+// buffer report
 USB_JoystickReport_Input_t last_report;
 int wait_time = 0;
 int count = 0;
 
-// @progmem: This will hold the state of the button packet. We'll set this a little later.
-uint16_t btn_toggle = 0;
 // Prepare the next report for the host.
 void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 	memset(ReportData, 0, sizeof(USB_JoystickReport_Input_t));
@@ -265,9 +265,8 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 	ReportData->RX = 128;
 	ReportData->RY = 128;
 	ReportData->HAT = 0x08;
-	// @progmem: Note that we're always setting Button to what's in our btn_toggle.
-	// I've removed the OR operand, since we'll be setting btn_toggle later, and Button should always match btn_toggle.
 
+	// Resends the same report till wait time is over
 	if (wait_time > 0)
 	{
 		memcpy(ReportData, &last_report, sizeof(USB_JoystickReport_Input_t));
@@ -275,33 +274,34 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 		return;
 	}
 
+	// script
 	switch(state)
 	{
 		case PRESS_A: // do 1x
 			if (release == 0)
 			{
-				ReportData->Button |= SWITCH_A;
-				release = 1;
+				release = 1; // if button was not pressed before set to be pressed
 			}
 			else
 			{
-				release = 0;
+				release = 0; // release button
 				break;
 			}
-			if (count > 0)
+			if (count > 0) // repeat button press 1 time
 			{
-				state = MOVE_LEFT;
+				state = MOVE_LEFT; //move on to next state
+				count = 0; // reset counter
 			}
 			else
 			{
-				count++;
+				ReportData->Button |= SWITCH_A; // press button
+				count++; // update counter
 			}
 			break;
 
 		case MOVE_LEFT: // do 5x
 			if (release == 0)
 			{
-				ReportData->HAT = LEFT;
 				release = 1;
 			}
 			else
@@ -309,15 +309,15 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 				release = 0;
 				break;
 			}
-			if (count > 4)
+			if (count > 5)
 			{
-					state = MOVE_UP;
-					count = 0;
-					break;
+				state = MOVE_UP;
+				count = 0;
 			}
 			else
 			{
-					count++;
+				ReportData->HAT = LEFT;
+				count++;
 			}
 			break;
 
@@ -329,7 +329,6 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 		case PRESS_OK: // do 6x
 			if (release == 0)
 			{
-				ReportData->Button |= SWITCH_A;
 				release = 1;
 			}
 			else
@@ -337,11 +336,11 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 				release = 0;
 				break;
 			}
-			if (count > 5)
+			if (count > 6)
 			{
-				if (end_month < 30)
+				if (end_month < 30) // accounts for end of month
 				{
-					frame++;
+					frame++; // update frame skip amount
 					end_month++;
 				}
 				else
@@ -350,19 +349,28 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 				}
 				state = PRESS_A;
 				count = 0;
-				break;
 			}
 			else
 			{
-					count++;
+				ReportData->Button |= SWITCH_A;
+				count++;
 			}
 			break;
 	}
 
-
-	// @progmem: If we haven't returned, then we're going to toggle the A button. This gives us our 'blinking'.
-	// This is doing an XOR operand, taking the current state of btn_toggle and XORing the SWITCH_A bit onto it.
-	// If A is held, this will release it. If A is not held, this will press it.
+	// Saves report data to buffer report
 	memcpy(&last_report, ReportData, sizeof(USB_JoystickReport_Input_t));
-	wait_time = WAIT;
+	// Sets wait_time depending on what stage auto hoster is up to
+	switch(state)
+	{
+		case PRESS_A:
+			wait_time = WAIT_PRESS;
+			break;
+		case PRESS_OK:
+			wait_time = WAIT_PRESS;
+			break;
+		default:
+			wait_time = WAIT;
+			break;
+	}
 }
