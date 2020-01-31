@@ -91,11 +91,12 @@ void debounce_ports(void) {
 	}
 }
 
-#define WAIT 4
-#define WAIT_PRESS 4
-#define SHINY_FRAME 3486
-int frame = 1;
-int end_month = 0;
+#define WAIT_VERY_SLOW 3000
+#define WAIT_SLOWER 1800
+#define WAIT_SLOW 400
+#define WAIT_MID_SLOW 45
+#define WAIT_MID 30
+#define WAIT_FAST 3
 
 // Main entry point.
 int main(void) {
@@ -106,9 +107,6 @@ int main(void) {
 	// Once that's done, we'll enter an infinite loop.
 	for (;;)
 	{
-		if (frame > (SHINY_FRAME - 4)) {// 4 frames out
-			for (;;) {} //when done enter infinite empty loop
-		}
 		// We need to run our task to process and deliver data for our IN and OUT endpoints.
 		HID_Task();
 		// We also need to run the main USB management task.
@@ -246,11 +244,17 @@ void HID_Task(void) {
 // script states
 typedef enum {
 	PRESS_A,
-	MOVE_LEFT,
-	MOVE_UP,
-	PRESS_OK
+	PRESS_A2,
+	PRESS_A3,
+	PRESS_B,
+	PRESS_Y,
+	PRESS_Y2,
+	PRESS_PLUS,
+	PRESS_HOME,
+	PRESS_UP,
+	PRESS_A_LOAD
 } State_t;
-State_t state = PRESS_A; // initial state
+State_t state = PRESS_A3; // initial state
 int release = 0;
 // buffer report
 USB_JoystickReport_Input_t last_report;
@@ -277,29 +281,28 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 	// script
 	switch(state)
 	{
-		case PRESS_A: // do 1x
+		case PRESS_HOME: // do 1x
 			if (release == 0)
 			{
 				release = 1; // if button was not pressed before set to be pressed
 			}
 			else
 			{
-				release = 0; // release button
+				release = 0;// release button
 				break;
 			}
 			if (count > 0) // repeat button press 1 time
 			{
-				state = MOVE_LEFT; //move on to next state
 				count = 0; // reset counter
+				state = PRESS_Y; //move on to next state
 			}
 			else
 			{
-				ReportData->Button |= SWITCH_A; // press button
+				ReportData->Button |= SWITCH_HOME; // press button
 				count++; // update counter
 			}
 			break;
-
-		case MOVE_LEFT: // do 5x
+		case PRESS_Y: // do 1x
 			if (release == 0)
 			{
 				release = 1;
@@ -309,24 +312,18 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 				release = 0;
 				break;
 			}
-			if (count > 5)
+			if (count > 0)
 			{
-				state = MOVE_UP;
 				count = 0;
+				state = PRESS_A;
 			}
 			else
 			{
-				ReportData->HAT = LEFT;
+				ReportData->Button |= SWITCH_Y;
 				count++;
 			}
 			break;
-
-		case MOVE_UP: // do 1x
-			ReportData->HAT = UP;
-			state = PRESS_OK;
-			break;
-
-		case PRESS_OK: // do 6x
+		case PRESS_A: // do 3x
 			if (release == 0)
 			{
 				release = 1;
@@ -336,19 +333,158 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 				release = 0;
 				break;
 			}
-			if (count > 6)
+			if (count > 2)
 			{
-				if (end_month < 30) // accounts for end of month
-				{
-					frame++; // update frame skip amount
-					end_month++;
-				}
-				else
-				{
-					end_month = 0;
-				}
-				state = PRESS_A;
 				count = 0;
+				state = PRESS_A_LOAD;
+				release = 1;
+			}
+			else
+			{
+				ReportData->Button |= SWITCH_A;
+				count++;
+			}
+			break;
+		case PRESS_A_LOAD:
+			if (release == 0)
+			{
+				release = 1;
+			}
+			else
+			{
+				release = 0;
+				break;
+			}
+			if (count > 0)
+			{
+				count = 0;
+				state = PRESS_Y2;
+			}
+			else
+			{
+				ReportData->Button |= SWITCH_A;
+				count++;
+			}
+		break;
+		case PRESS_Y2: // do 1x
+			if (release == 0)
+			{
+				release = 1;
+			}
+			else
+			{
+				release = 0;
+				break;
+			}
+			if (count > 0)
+			{
+				count = 0;
+				state = PRESS_PLUS;
+			}
+			else
+			{
+				ReportData->Button |= SWITCH_Y;
+				count++;
+			}
+			break;
+		case PRESS_PLUS: // do 1x
+			if (release == 0)
+			{
+				release = 1;
+			}
+			else
+			{
+				release = 0;
+				break;
+			}
+			if (count > 0)
+			{
+				count = 0;
+				state = PRESS_B;
+			}
+			else
+			{
+				ReportData->Button |= SWITCH_START;
+				count++;
+			}
+			break;
+		case PRESS_B: // do 2x
+			if (release == 0)
+			{
+				release = 1;
+			}
+			else
+			{
+				release = 0;
+				break;
+			}
+			if (count > 1)
+			{
+				count = 0;
+				state = PRESS_A2;
+			}
+			else
+			{
+				ReportData->Button |= SWITCH_B;
+				count++;
+			}
+			break;
+		case PRESS_A2: // do 2x
+			if (release == 0)
+			{
+				release = 1;
+			}
+			else
+			{
+				release = 0;
+				break;
+			}
+			if (count > 1)
+			{
+				count = 0;
+				state = PRESS_UP;
+			}
+			else
+			{
+				ReportData->Button |= SWITCH_A;
+				count++;
+			}
+			break;
+		case PRESS_UP: // do 1x
+			if (release == 0)
+			{
+				release = 1;
+			}
+			else
+			{
+				release = 0;
+				break;
+			}
+			if (count > 0)
+			{
+				count = 0;
+				state = PRESS_A3;
+			}
+			else
+			{
+				ReportData->HAT = UP;
+				count++;
+			}
+			break;
+		case PRESS_A3: // do 5x
+			if (release == 0)
+			{
+				release = 1;
+			}
+			else
+			{
+				release = 0;
+				break;
+			}
+			if (count > 4)
+			{
+				count = 0;
+				state = PRESS_HOME;
 			}
 			else
 			{
@@ -364,13 +500,72 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 	switch(state)
 	{
 		case PRESS_A:
-			wait_time = WAIT_PRESS;
+			if (release == 0) //how long button is held
+			{
+				wait_time = WAIT_FAST;
+			}
+			else // how long button is released
+			{
+				wait_time = WAIT_SLOW;
+			}
 			break;
-		case PRESS_OK:
-			wait_time = WAIT_PRESS;
+		case PRESS_A2:
+			wait_time = WAIT_SLOW/2;
+			break;
+		case PRESS_A3:
+		if (release == 0)
+			{
+				wait_time = WAIT_MID;
+			}
+			else
+			{
+				wait_time = WAIT_MID_SLOW;
+			}
+			break;
+		case PRESS_B:
+			wait_time = WAIT_SLOW/4;
+			break;
+		case PRESS_A_LOAD:
+			if (release == 0)
+			{
+				wait_time = WAIT_FAST;
+			}
+			else
+			{
+				wait_time = WAIT_VERY_SLOW;
+			}
+		break;
+		case PRESS_Y:
+			if (release == 0)
+			{
+				wait_time = WAIT_FAST;
+			}
+			else
+			{
+				wait_time = WAIT_SLOW * 1.5;
+			}
+			break;
+		case PRESS_Y2:
+			wait_time = WAIT_FAST;
+			break;
+		case PRESS_PLUS:
+			wait_time = WAIT_SLOW;
+			break;
+		case PRESS_HOME:
+			if (release == 0)
+			{
+				wait_time = WAIT_FAST;
+			}
+			else
+			{
+				wait_time = WAIT_MID;
+			}
+			break;
+		case PRESS_UP:
+			wait_time = WAIT_SLOWER;
 			break;
 		default:
-			wait_time = WAIT;
+			wait_time = WAIT_SLOW;
 			break;
 	}
 }
