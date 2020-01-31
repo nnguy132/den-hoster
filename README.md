@@ -6,30 +6,14 @@ https://github.com/shinyquagsire23/Switch-Fightstick
 
 TESTED ON ARDUINO UNO R3
 NO CFW REQUIRED
-CODE CURRENTLY ONLY WORKS ON DD/MM
-In order to change it to mm/dd change line 342 from end_month < 30 to end_month < 12
+WORKS WHILE DOCKED
 
 ## Install instructions:
 Pretty much the same as shinyquagsire23's install instructions
 
 ## Setup:
-1) On line 94 in Joystick.c change the frame of which your shiny is at (assuming you are at frame 1)
+1) Boot up the game
 
-2) Run make file
+2) Save in front of the den you want to host, facing the den
 
-3) Flash the hex file to the teensy/arduino
-
-4) Setup the VS's glitch as seen in the video below
-https://youtu.be/UKzyL2bPEnI
-
-5) Open up the date and time in options > systems
-
-6) Open the date and time and set time to the 1st of Jan
-
-7) Close then reopen the date
-
-8) Hover over the OK button
-
-9) Plug in the Arduino/teensy
-
-## The switch will stop 4 frames out from the desired shiny to allow to reset for the correct species ##
+3) Plug in the arduino
