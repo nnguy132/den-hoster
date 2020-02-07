@@ -243,18 +243,18 @@ void HID_Task(void) {
 
 // script states
 typedef enum {
-	PRESS_A,
-	PRESS_A2,
-	PRESS_A3,
-	PRESS_B,
-	PRESS_Y,
-	PRESS_Y2,
+	OPEN_GAME,
+	OPEN_DEN,
+	START_DEN,
+	EXIT_Y_COMM,
+	CHANGE_USER,
+	OPEN_Y_COMM,
 	PRESS_PLUS,
-	PRESS_HOME,
+	OPEN_HOME,
 	PRESS_UP,
-	PRESS_A_LOAD
+	BUTTON_TO_START
 } State_t;
-State_t state = PRESS_A3; // initial state
+State_t state = START_DEN; // initial state
 int release = 0;
 // buffer report
 USB_JoystickReport_Input_t last_report;
@@ -281,7 +281,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 	// script
 	switch(state)
 	{
-		case PRESS_HOME: // do 1x
+		case OPEN_HOME: // do 1x
 			if (release == 0)
 			{
 				release = 1; // if button was not pressed before set to be pressed
@@ -294,7 +294,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 			if (count > 0) // repeat button press 1 time
 			{
 				count = 0; // reset counter
-				state = PRESS_Y; //move on to next state
+				state = CHANGE_USER; //move on to next state
 			}
 			else
 			{
@@ -302,7 +302,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 				count++; // update counter
 			}
 			break;
-		case PRESS_Y: // do 1x
+		case CHANGE_USER: // do 1x
 			if (release == 0)
 			{
 				release = 1;
@@ -315,7 +315,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 			if (count > 0)
 			{
 				count = 0;
-				state = PRESS_A;
+				state = OPEN_GAME;
 			}
 			else
 			{
@@ -323,7 +323,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 				count++;
 			}
 			break;
-		case PRESS_A: // do 3x
+		case OPEN_GAME: // do 3x
 			if (release == 0)
 			{
 				release = 1;
@@ -336,7 +336,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 			if (count > 2)
 			{
 				count = 0;
-				state = PRESS_A_LOAD;
+				state = BUTTON_TO_START;
 				release = 1;
 			}
 			else
@@ -345,7 +345,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 				count++;
 			}
 			break;
-		case PRESS_A_LOAD:
+		case BUTTON_TO_START:
 			if (release == 0)
 			{
 				release = 1;
@@ -358,7 +358,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 			if (count > 0)
 			{
 				count = 0;
-				state = PRESS_Y2;
+				state = OPEN_Y_COMM;
 			}
 			else
 			{
@@ -366,7 +366,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 				count++;
 			}
 		break;
-		case PRESS_Y2: // do 1x
+		case OPEN_Y_COMM: // do 1x
 			if (release == 0)
 			{
 				release = 1;
@@ -400,7 +400,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 			if (count > 0)
 			{
 				count = 0;
-				state = PRESS_B;
+				state = EXIT_Y_COMM;
 			}
 			else
 			{
@@ -408,7 +408,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 				count++;
 			}
 			break;
-		case PRESS_B: // do 2x
+		case EXIT_Y_COMM: // do 2x
 			if (release == 0)
 			{
 				release = 1;
@@ -421,7 +421,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 			if (count > 1)
 			{
 				count = 0;
-				state = PRESS_A2;
+				state = OPEN_DEN;
 			}
 			else
 			{
@@ -429,7 +429,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 				count++;
 			}
 			break;
-		case PRESS_A2: // do 2x
+		case OPEN_DEN: // do 2x
 			if (release == 0)
 			{
 				release = 1;
@@ -463,7 +463,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 			if (count > 0)
 			{
 				count = 0;
-				state = PRESS_A3;
+				state = START_DEN;
 			}
 			else
 			{
@@ -471,7 +471,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 				count++;
 			}
 			break;
-		case PRESS_A3: // do 5x
+		case START_DEN: // do 5x
 			if (release == 0)
 			{
 				release = 1;
@@ -484,7 +484,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 			if (count > 4)
 			{
 				count = 0;
-				state = PRESS_HOME;
+				state = OPEN_HOME;
 			}
 			else
 			{
@@ -499,7 +499,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 	// Sets wait_time depending on what stage auto hoster is up to
 	switch(state)
 	{
-		case PRESS_A:
+		case OPEN_GAME:
 			if (release == 0) //how long button is held
 			{
 				wait_time = WAIT_FAST;
@@ -509,10 +509,10 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 				wait_time = WAIT_SLOW;
 			}
 			break;
-		case PRESS_A2:
+		case OPEN_DEN:
 			wait_time = WAIT_SLOW/2;
 			break;
-		case PRESS_A3:
+		case START_DEN:
 		if (release == 0)
 			{
 				wait_time = WAIT_MID;
@@ -522,10 +522,10 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 				wait_time = WAIT_MID_SLOW;
 			}
 			break;
-		case PRESS_B:
+		case EXIT_Y_COMM:
 			wait_time = WAIT_SLOW/4;
 			break;
-		case PRESS_A_LOAD:
+		case BUTTON_TO_START:
 			if (release == 0)
 			{
 				wait_time = WAIT_FAST;
@@ -535,7 +535,7 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 				wait_time = WAIT_VERY_SLOW;
 			}
 		break;
-		case PRESS_Y:
+		case CHANGE_USER:
 			if (release == 0)
 			{
 				wait_time = WAIT_FAST;
@@ -545,13 +545,13 @@ void GetNextReport(USB_JoystickReport_Input_t* const ReportData) {
 				wait_time = WAIT_SLOW * 1.5;
 			}
 			break;
-		case PRESS_Y2:
+		case OPEN_Y_COMM:
 			wait_time = WAIT_FAST;
 			break;
 		case PRESS_PLUS:
 			wait_time = WAIT_SLOW;
 			break;
-		case PRESS_HOME:
+		case OPEN_HOME:
 			if (release == 0)
 			{
 				wait_time = WAIT_FAST;
