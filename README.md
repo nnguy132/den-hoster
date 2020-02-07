@@ -12,6 +12,8 @@ WORKS WHILE DOCKED
 Pretty much the same as shinyquagsire23's install instructions
 
 ## Setup:
+The script currently requires you have more than 1 profile
+
 1) Boot up the game
 
 2) Save in front of the den you want to host, facing the den
