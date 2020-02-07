@@ -13,6 +13,7 @@ Pretty much the same as shinyquagsire23's install instructions
 
 ## Setup:
 The script currently requires you have more than 1 profile
+The script will wait 1 minute before starting the raid
 
 1) Boot up the game
 
